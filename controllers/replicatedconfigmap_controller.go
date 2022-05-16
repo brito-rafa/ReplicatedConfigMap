@@ -173,6 +173,16 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.
 				rcmObj.Status.Phase = replicationsv1alpha1.PhaseFailed
 				return ctrl.Result{}, err
 			}
+			// Debugging why finalizer is not getting deleted
+			f := rcmObj.GetFinalizers()
+			for i := 0; i < len(f); i++ {
+				if f[i] == finalizer {
+					msg = fmt.Sprintf("Finalizer still on for the %q, removing brute force", rcmObj.GetName())
+					myLog.Info(msg)
+					rcmObj.ObjectMeta.Finalizers = []string{}
+					r.Status().Update(ctx, rcmObj)
+				}
+			}
 		}
 	}
 
