@@ -165,23 +165,10 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.
 			msg = fmt.Sprintf("Finalizer complete on %q", rcmObj.GetName())
 			myLog.Info(msg)
 			controllerutil.RemoveFinalizer(rcmObj, finalizer)
-			// for some reason, the finalizer is not getting removed
-			// trying two updates
-			r.Status().Update(ctx, rcmObj)
-			controllerutil.RemoveFinalizer(rcmObj, finalizer)
-			if err := r.Status().Update(ctx, rcmObj); err != nil {
+			if err := r.Update(ctx, rcmObj); err != nil {
 				rcmObj.Status.Phase = replicationsv1alpha1.PhaseFailed
+				r.Status().Update(ctx, rcmObj)
 				return ctrl.Result{}, err
-			}
-			// Debugging why finalizer is not getting deleted
-			f := rcmObj.GetFinalizers()
-			for i := 0; i < len(f); i++ {
-				if f[i] == finalizer {
-					msg = fmt.Sprintf("Finalizer still on for the %q, removing brute force", rcmObj.GetName())
-					myLog.Info(msg)
-					rcmObj.ObjectMeta.Finalizers = []string{}
-					r.Status().Update(ctx, rcmObj)
-				}
 			}
 		}
 	}
@@ -189,6 +176,7 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.
 	res := ctrl.Result{RequeueAfter: defaultRequeue}
 	var err error
 
+	// Actual reconciliation
 	// If Deletion is in process, do not attempt to reconcile
 	if rcmObj.Status.Phase != replicationsv1alpha1.PhaseDeletion {
 		res, err = r.doReconcileResources(ctx, rcmObj)
@@ -196,7 +184,7 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(ctx context.Context, req ctrl.
 			myLog.Error(err, "could not finish reconciliation)")
 			rcmObj.Status.Phase = replicationsv1alpha1.PhaseFailed
 			r.Status().Update(ctx, rcmObj)
-			return ctrl.Result{}, err
+			return ctrl.Result{RequeueAfter: defaultRequeue}, err
 		}
 	} else {
 		// wait a bit for the requeue
@@ -303,7 +291,7 @@ func (r *ReplicatedConfigMapReconciler) doReconcileResources(ctx context.Context
 				r.Status().Update(ctx, obj)
 				return ctrl.Result{}, err
 			}
-			//}
+
 		}
 
 		obj.Status.MatchingNamespaces = obj.Status.MatchingNamespaces + " " + namespace
