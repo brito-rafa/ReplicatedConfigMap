@@ -1,0 +1,16 @@
+domain: example.io
+layout:
+- go.kubebuilder.io/v3
+projectName: rcm
+repo: rcm
+resources:
+- api:
+    crdVersion: v1
+    namespaced: false
+  controller: true
+  domain: example.io
+  group: replications
+  kind: ReplicatedConfigMap
+  path: rcm/api/v1alpha1
+  version: v1alpha1
+version: "3"

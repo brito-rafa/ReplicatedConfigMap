@@ -1,0 +1,24 @@
+# permissions for end users to edit replicatedconfigmaps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: replicatedconfigmap-editor-role
+rules:
+- apiGroups:
+  - replications.example.io
+  resources:
+  - replicatedconfigmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - replications.example.io
+  resources:
+  - replicatedconfigmaps/status
+  verbs:
+  - get

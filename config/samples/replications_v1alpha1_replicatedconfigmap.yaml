@@ -1,0 +1,6 @@
+apiVersion: replications.example.io/v1alpha1
+kind: ReplicatedConfigMap
+metadata:
+  name: replicatedconfigmap-sample
+spec:
+  # TODO(user): Add fields here

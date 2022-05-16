@@ -1,0 +1,54 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-replications-example-io-v1alpha1-replicatedconfigmap
+  failurePolicy: Fail
+  name: mreplicatedconfigmap.kb.io
+  rules:
+  - apiGroups:
+    - replications.example.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - replicatedconfigmaps
+  sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-replications-example-io-v1alpha1-replicatedconfigmap
+  failurePolicy: Fail
+  name: vreplicatedconfigmap.kb.io
+  rules:
+  - apiGroups:
+    - replications.example.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - replicatedconfigmaps
+  sideEffects: None
